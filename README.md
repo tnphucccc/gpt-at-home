@@ -15,64 +15,63 @@ A character-level language model implementation using PyTorch. Generates Shakesp
 
 ## Requirements
 
-- Python 3.12+
-- PyTorch with CUDA support (optional)
-- Additional dependencies in `requirements.txt`
+- Python 3.12+ (with `venv`; on Ubuntu/WSL: `sudo apt install python3.12-venv`)
+- [Bun](https://bun.sh) (or Node.js) for the web app
+- NVIDIA GPU optional — the model runs fine on CPU
 
-## Installation
+## Run locally
 
-1. Clone the repository:
+The project has two parts: a FastAPI server that serves the model (`server/`) and a React chat UI (`app/`). Run each in its own terminal.
+
+**1. Server** (http://localhost:8000)
 ```bash
-git clone https://github.com/tnphucccc/GPTAtHome.git
-cd GPTAtHome
-```
-
-2. Create and activate virtual environment
-```bash
-python -m venv venv
-source venv/bin/activate  # Linux/Mac
-# or
-.\venv\Scripts\activate  # Windows
-```
-
-3. Install dependencies
-```bash
+cd server
+python3 -m venv .venv
+source .venv/bin/activate
 pip install -r requirements.txt
+fastapi dev main.py
 ```
+On first start the trained weights (~50 MB) are downloaded from the GitHub release into `server/core/src/weight/model.pth`.
+API docs are at http://localhost:8000/docs.
 
-## Training the Model
-Train the language model on Shakespeare text:
+**2. Web app** (http://localhost:5173)
 ```bash
+cd app
+bun install
+bun run dev
+```
+The app calls `http://localhost:8000` by default; set `VITE_API_URL` to point it elsewhere.
+
+## Training the model
+
+```bash
+cd server/core
 python src/train.py
 ```
-This will:
-- Load the Shakespeare dataset from `input.txt`.
-- Train using the specified model architecture.
-- Save the trained model checkpoint.
+This trains on `data/input.txt` (Tiny Shakespeare) and saves the best checkpoint to `server/core/checkpoints/model.pth`.
+To serve your own checkpoint, copy it to `server/core/src/weight/model.pth`.
 
-## Generating Text
-Generate Shakespeare-style text using the trained model:
+## Tests
+
 ```bash
-python src/generate.py
+server/.venv/bin/python -m pytest tests
 ```
-You can give your input context or just enter for random context.
-Type `/quit` to exit the generation program.
 
 ## Project Structure
 
 ```bash
 GPTAtHome/
-├── data/
-│   └── input.txt         # Training data (Shakespeare text)
-├── src/
-│   ├── models/
-│   │   ├── bigram.py     # BigramLanguageModel implementation
-│   │   └── gpt.py        # GPTLanguageModel implementation           
-│   ├── utils/
-│   │   └── data_processor.py
-│   ├── train.py          # Training script
-│   └── generate.py       # Generate script  
-└── tests/
-    ├── test_bigram.py    # Unit tests
-    └── test_gpt.py
+├── app/                      # React + Vite chat UI
+│   └── src/
+├── server/
+│   ├── main.py               # FastAPI app (POST /generate)
+│   ├── api/context.py        # Request model, calls the runtime model
+│   └── core/
+│       ├── data/input.txt    # Training data (Tiny Shakespeare)
+│       └── src/
+│           ├── models/       # bigram.py, gpt.py
+│           ├── utils/data_processor.py
+│           ├── train.py      # Training script
+│           └── generate.py   # Loads/downloads weights, generates text
+└── tests/                    # Unit tests
 ```
