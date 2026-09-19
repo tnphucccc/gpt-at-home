@@ -1,8 +1,5 @@
+torch>=2.2
 numpy
-pandas
---extra-index-url https://download.pytorch.org/whl/cu124
-torch
-torchvision
-torchaudio
-aiohttp
 fastapi[standard]==0.115.6
+requests
+pytest

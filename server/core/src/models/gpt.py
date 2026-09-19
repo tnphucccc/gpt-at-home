@@ -233,6 +233,7 @@ class GPTLanguageModel(nn.Module):
 
         return logits, loss
 
+    @torch.no_grad()
     def generate(self, idx, max_new_tokens):
         """
         Generate new tokens by sampling from the model's probability distribution.
