@@ -7,11 +7,6 @@ import MessageService from "../services/MessageService";
 interface PromptContextType {
     prompt: Prompt | null;
     setPrompt: React.Dispatch<React.SetStateAction<Prompt | null>>;
-}
-
-interface PromptContextType {
-    prompt: Prompt | null;
-    setPrompt: React.Dispatch<React.SetStateAction<Prompt | null>>;
     messages: Message[];
     loading: boolean;
     addMsg: (msg: Message) => void;
@@ -34,13 +29,13 @@ export const PromptProvider: React.FC<PromptProviderProps> = ({ children }) => {
             if (prompt) {
                 setLoading(true)
                 const [response, error] = await PromptService.post(prompt)
+                setLoading(false)
                 if (error) {
-                    alert(error)
+                    alert(error.message)
                     return;
                 }
 
-                const newMsg = MessageService.fromAnswer(response)
-                setLoading(false)
+                const newMsg = MessageService.fromAnswer(response, prompt.prompt)
                 addMsg(newMsg)
             }
         }

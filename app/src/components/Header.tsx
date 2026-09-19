@@ -1,29 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { usePrompt } from '../hooks/Prompt';
 
 const Header: React.FC = () => {
-    const [showTutorial, setShowTutorial] = useState<boolean>(true);
-    const { loading, prompt } = usePrompt();
-
-    useEffect(() => {
-        if (prompt) {
-            setShowTutorial(false);
-        }
-    }, [prompt]); // Re-run when `prompt` changes
+    const { loading } = usePrompt();
 
     return (
-        <div className="w-full">
-            {showTutorial && (
-                <p className="w-full text-center italic text-white py-1">
-                    Start to give a topic and wait for our AI to generate the story!
-                </p>
-            )}
+        <div className="w-full text-center text-white px-4">
+            <p className="italic text-gray-300 py-1">
+                A tiny character-level GPT trained only on Shakespeare. It continues the scene you
+                start — it can't answer questions or follow instructions.
+            </p>
             {loading && (
-                <div className='flex justify-center items-center text-white'>
-                    <svg className="animate-spin h-5 w-5 mr-3" viewBox="0 0 24 24" fill="white"></svg>
-                    <p className="text-white text-center">AI is generating the story for you...</p>
-                </div>
-                
+                <p role="status" className="text-white py-1">Writing the scene...</p>
             )}
         </div>
     );
