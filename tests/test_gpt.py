@@ -1,7 +1,7 @@
 import unittest
 import torch
-from src.utils.data_processor import TextProcessor
-from src.models.gpt import GPTLanguageModel
+from core.src.utils.data_processor import TextProcessor
+from core.src.models.gpt import GPTLanguageModel
 
 block_size = 256
 

@@ -7,7 +7,7 @@ import Prompt from "../models/Prompt";
 const SendMessage: React.FC = () => {
   const [message, setMessage] = useState<string>("");
   const [token, setToken] = useState<number>(500);
-  const { setPrompt, addMsg, loading } = usePrompt();
+  const { setPrompt, loading } = usePrompt();
 
   const valuetext = useCallback((value: number) => {
     setToken(value);
@@ -17,32 +17,25 @@ const SendMessage: React.FC = () => {
   const sendMessage = useCallback(
     async (event: React.FormEvent) => {
       event.preventDefault();
-      if (message.trim() === "") {
-        alert("Enter a valid message");
-        return;
-      }
+      if (loading) return;
+      // An empty prompt is allowed: the model then starts a random scene
       const prompt: Prompt = {
         prompt: message,
         maxTokens: token,
       };
       setPrompt(prompt);
-      const newMsg = {
-        content: message,
-        id: Date.now(),
-        isAI: false,
-      };
-      addMsg(newMsg);
       setMessage("");
     },
-    [message, token, setPrompt, addMsg]
+    [message, token, loading, setPrompt]
   );
 
   return (
     <form
-      className="w-full flex px-5 py-3 justify-center items-center"
+      className="w-full flex flex-col px-5 py-3 justify-center items-center"
       onSubmit={sendMessage}
     >
-      <div className="w-1/2 py-3 rounded-lg px-5 bg-[#2f2f2f] flex">
+      <StarterPrompts onPick={setMessage} />
+      <div className="w-full max-w-3xl py-3 rounded-lg px-5 bg-[#2f2f2f] flex">
         <div className="w-full">
           <MessageInput message={message} setMessage={setMessage} />
           <TokenSlider token={token} valuetext={valuetext} />
@@ -54,13 +47,40 @@ const SendMessage: React.FC = () => {
   );
 };
 
+// Most frequent speakers in the Tiny Shakespeare training text
+const STARTERS = [
+  "ROMEO:\n",
+  "JULIET:\n",
+  "GLOUCESTER:\n",
+  "KING RICHARD III:\nMy lord, ",
+  "DUKE VINCENTIO:\n",
+  "PETRUCHIO:\n",
+];
+
+const StarterPrompts: React.FC<{ onPick: (text: string) => void }> = React.memo(({ onPick }) => (
+  <div className="w-full max-w-3xl flex flex-wrap gap-2 pb-2">
+    {STARTERS.map((text) => (
+      <button
+        key={text}
+        type="button"
+        className="text-sm text-white border border-gray-500 rounded-full px-3 py-1 hover:bg-[#2f2f2f]"
+        onClick={() => onPick(text)}
+      >
+        {text.split("\n")[0]}
+      </button>
+    ))}
+  </div>
+));
+
 const MessageInput: React.FC<{
   message: string;
   setMessage: React.Dispatch<React.SetStateAction<string>>;
 }> = React.memo(({ message, setMessage }) => (
   <textarea
     className="bg-transparent w-full focus:outline-none text-white py-2"
-    placeholder="Enter your message"
+    aria-label="Start of the scene"
+    rows={2}
+    placeholder={"Start a scene, e.g. ROMEO:  — or leave empty for a random scene"}
     value={message}
     onChange={(e) => setMessage(e.target.value)}
   />
@@ -97,6 +117,7 @@ const SendButton: React.FC<{ loading: boolean }> = React.memo(({ loading }) => (
       loading ? "cursor-not-allowed opacity-50" : "cursor-pointer"
     }`}
     disabled={loading}
+    aria-label="Generate"
   >
     <SendIcon />
   </button>

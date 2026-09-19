@@ -1,13 +1,15 @@
 import unittest
+from pathlib import Path
+
 import torch
-from src.utils.data_processor import TextProcessor
-from src.models.bigram import BigramLanguageModel
+from core.src.utils.data_processor import TextProcessor
+from core.src.models.bigram import BigramLanguageModel
 
 
 class TestBigramModel(unittest.TestCase):
     def setUp(self):
         # Simple test vocabulary
-        self.test_text = "data/input.txt"
+        self.test_text = Path(__file__).resolve().parent.parent / "server/core/data/input.txt"
         self.processor = TextProcessor(self.test_text)
         self.model = BigramLanguageModel(vocab_size=self.processor.vocab_size)
 

@@ -1,5 +1,7 @@
 export default interface Message {
-    content: string;
     id: number;
-    isAI: boolean;
+    // Text the user started the scene with (may be empty)
+    prompt: string;
+    // Text the model generated to continue the prompt
+    completion: string;
 }
